@@ -1,0 +1,19 @@
+@mixin font($value: 16, $weight: 400, $line-height: inherit) {
+  font-size: $value+rem;
+  font-weight: $weight;
+  line-height: $line-height+rem;
+}
+
+@mixin fadeIn($time: 0.3s) {
+  animation: fadeIn 0.3s,;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+
+  to {
+      opacity: 1;
+  }
+}

@@ -1,0 +1,107 @@
+@use '../abstracts';
+
+body {
+  font-family: abstracts.$font-family-text;
+}
+
+*,
+*::after,
+*::before {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+* {
+  outline: 0;
+  margin: 0;
+  padding: 0;
+  vertical-align: baseline;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input {
+  box-shadow: none;
+  border-radius: 0;
+}
+
+ul,
+li {
+  padding-left: 0;
+  list-style: none;
+}
+
+address {
+  margin-bottom: 0;
+}
+
+a {
+  text-decoration: none;
+  transition: 0.3s;
+  display: flex;
+}
+
+p {
+  margin-bottom: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin: 0;
+  font-size: 16rem;
+  font-weight: 400;
+}
+
+ul {
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+button {
+  transition: 0.3s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+}
+
+/* Neutralize browser autofill background color without altering layout/typography */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: inherit;
+  caret-color: inherit;
+}
+
+/* Firefox */
+input:-moz-autofill,
+textarea:-moz-autofill,
+select:-moz-autofill {
+  box-shadow: 0 0 0 1000px transparent inset;
+  background-color: transparent !important;
+  color: inherit;
+  caret-color: inherit;
+}

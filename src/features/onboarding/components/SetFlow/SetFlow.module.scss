@@ -1,0 +1,96 @@
+@use '@/assets/styles/abstracts/' as *;
+
+.hierarchy {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #F9F8F8;
+    overflow: hidden;
+
+    &__blur {
+        position: absolute;
+        width: 562rem;
+        height: 633rem;
+        left: -259.82rem;
+        top: 480.95rem;
+        background: linear-gradient(180deg, rgba(161, 127, 231, 0.7) 34.82%, rgba(147, 124, 195, 0.7) 43.88%);
+        filter: blur(275.3rem);
+        transform: rotate(-59.15deg);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    &__blur2 {
+        position: absolute;
+        width: 650.32rem;
+        height: 569rem;
+        left: 763rem;
+        top: -156rem;
+        background: linear-gradient(180deg, rgba(161, 127, 231, 0.8) 34.82%, rgba(147, 124, 195, 0.8) 43.88%);
+        filter: blur(275.3rem);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    &__content {
+        position: absolute;
+        top: 168rem;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+
+        :global(.react-flow) {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        :global(.react-flow__viewport) {
+            cursor: grab;
+
+            &:active {
+                cursor: grabbing;
+            }
+        }
+
+        :global(.react-flow__node) {
+            cursor: grab;
+
+            &:active {
+                cursor: grabbing;
+            }
+        }
+
+        :global(.react-flow__edge-path) {
+            stroke: #561CCE;
+            stroke-width: 2rem;
+        }
+
+        :global(.react-flow__edge) {
+            pointer-events: all;
+            cursor: pointer;
+        }
+
+        :global(.react-flow__handle) {
+            width: 10rem !important;
+            height: 10rem !important;
+            background: #561CCE;
+            border: 2rem solid #fff;
+            border-radius: 50%;
+        }
+
+        :global(.react-flow__background) {
+            background-color: transparent;
+        }
+
+        :global(.react-flow__selection) {
+            background: rgba(161, 127, 231, 0.1);
+            border: 1rem solid #A17FE7;
+        }
+
+        :global(.react-flow__panel.react-flow__attribution) {
+            display: none;
+        }
+    }
+}

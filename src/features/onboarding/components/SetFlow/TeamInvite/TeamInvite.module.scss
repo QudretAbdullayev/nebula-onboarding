@@ -1,0 +1,355 @@
+@use '@/assets/styles/abstracts/' as *;
+
+.invite {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  &__modal {
+    position: relative;
+    width: 594rem;
+    background: $white;
+    box-shadow: 0 10rem 15rem -3rem rgba(0, 0, 0, 0.1), 0 4rem 6rem -4rem rgba(0, 0, 0, 0.1);
+    border-radius: 20rem;
+    padding: 24rem;
+    z-index: 1;
+  }
+
+  &__close {
+    position: absolute;
+    top: 12rem;
+    right: 12rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32rem;
+    height: 32rem;
+    border: none;
+    background: transparent;
+    border-radius: 99rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    svg {
+      width: 16rem;
+      height: 16rem;
+      color: #666666;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 6rem;
+    margin-bottom: 24rem;
+  }
+
+  &__title {
+    font-family: 'DM Sans', sans-serif;
+    @include font(20, 600, 28);
+    color: #262626;
+  }
+
+  &__description {
+    font-family: 'DM Sans', sans-serif;
+    @include font(16, 500, 24);
+    color: #666666;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 12rem;
+    margin-bottom: 24rem;
+
+    &__item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 8rem;
+      gap: 10rem;
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      @include font(18, 500, 26);
+      text-align: center;
+      color: #999999;
+      cursor: pointer;
+      border-bottom: 2rem solid transparent;
+      transition: all 0.3s ease;
+
+      &__active {
+        @include font(18, 600, 26);
+        color: #A17FE7;
+        border-bottom-color: #A17FE7;
+      }
+
+      &:hover:not(&__active) {
+        color: #666666;
+      }
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 18rem;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 10rem;
+  }
+
+  &__label {
+    font-family: 'DM Sans', sans-serif;
+    @include font(16, 500, 24);
+    color: #262626;
+  }
+
+  &__input {
+    width: 100%;
+    height: 40rem;
+    padding: 4rem 12rem;
+    background: $white;
+    border: 1rem solid #E2E8F0;
+    border-radius: 20rem;
+    font-family: 'Inter', sans-serif;
+    @include font(16, 400, 16);
+    color: #717182;
+    transition: border-color 0.3s ease;
+
+    &::placeholder {
+      color: #717182;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #A17FE7;
+    }
+  }
+
+  &__select {
+    position: relative;
+    width: 100%;
+
+    &__input {
+      width: 100%;
+      height: 40rem;
+      padding: 0 40rem 0 12rem;
+      background: $white;
+      border: 1rem solid #E2E8F0;
+      border-radius: 20rem;
+      font-family: 'Inter', sans-serif;
+      @include font(16, 400, 16);
+      text-align: center;
+      color: #717182;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #A17FE7;
+      }
+    }
+
+    &__icon {
+      position: absolute;
+      right: 12rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16rem;
+      height: 16rem;
+      opacity: 0.5;
+      color: #717182;
+      pointer-events: none;
+    }
+  }
+
+  &__submit {
+    width: 100%;
+    height: 34rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 8rem;
+    gap: 8rem;
+    background: #D0BFF3;
+    border: none;
+    border-radius: 99rem;
+    font-family: 'DM Sans', sans-serif;
+    @include font(14, 500, 18);
+    color: #FAFAFA;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: lighten(#D0BFF3, 5%);
+    }
+
+    &:active {
+      background: darken(#D0BFF3, 5%);
+    }
+  }
+
+  &__divider {
+    width: 100%;
+    height: 1rem;
+    background: #E2E8F0;
+    margin: 24rem 0;
+  }
+
+  &__members {
+    display: flex;
+    flex-direction: column;
+    gap: 12rem;
+
+    &__title {
+      font-family: 'DM Sans', sans-serif;
+      @include font(16, 500, 24);
+      color: #262626;
+    }
+  }
+
+  &__avatars {
+    display: flex;
+    align-items: center;
+
+    &__item {
+      width: 44rem;
+      height: 44rem;
+      border-radius: 100rem;
+      border: 1rem solid #EDEDED;
+      overflow: hidden;
+      margin-left: -16rem;
+      background: #E2E8F0;
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    &__placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #A17FE7;
+      font-family: 'DM Sans', sans-serif;
+      @include font(18, 500, 26);
+      color: $white;
+    }
+
+    &__more {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      width: 44rem;
+      height: 44rem;
+      padding: 8rem;
+      background: $white;
+      border: 1rem solid #CCCCCC;
+      border-radius: 100rem;
+
+      svg {
+        width: 12rem;
+        height: 12rem;
+        color: #404040;
+      }
+
+      span {
+        font-family: 'DM Sans', sans-serif;
+        @include font(18, 500, 26);
+        color: #404040;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16rem;
+    padding-top: 16rem;
+    border-top: 1rem solid #E2E8F0;
+    margin-top: 24rem;
+
+    &__skip {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem 8rem;
+      gap: 8rem;
+      width: 100%;
+      height: 34rem;
+      background: $white;
+      border: 1rem solid #E2E8F0;
+      border-radius: 99rem;
+      font-family: 'Urbanist', sans-serif;
+      @include font(14, 500, 21);
+      text-align: center;
+      color: #0C0C0C;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #F9F9F9;
+      }
+    }
+
+    &__continue {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem 8rem;
+      gap: 8rem;
+      width: 100%;
+      height: 34rem;
+      background: #A17FE7;
+      border: none;
+      border-radius: 99rem;
+      font-family: 'Urbanist', sans-serif;
+      @include font(14, 500, 21);
+      text-align: center;
+      color: $white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background: lighten(#A17FE7, 5%);
+      }
+
+      &:active {
+        background: darken(#A17FE7, 5%);
+      }
+    }
+  }
+}
