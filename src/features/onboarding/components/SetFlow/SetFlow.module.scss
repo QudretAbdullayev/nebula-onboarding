@@ -37,60 +37,47 @@
         top: 168rem;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: calc(100% - 168rem);
         z-index: 1;
+        overflow: hidden;
+        cursor: grab;
 
-        :global(.react-flow) {
-            width: 100%;
-            height: 100%;
-            background: transparent;
+        &:active {
+            cursor: grabbing;
         }
+    }
 
-        :global(.react-flow__viewport) {
-            cursor: grab;
+    &__canvas {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-origin: center top;
+        transition: transform 0.05s ease-out;
+        will-change: transform;
+    }
 
-            &:active {
-                cursor: grabbing;
-            }
-        }
+    &__lines {
+        position: absolute;
+        top: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: visible;
+    }
 
-        :global(.react-flow__node) {
-            cursor: grab;
+    &__card {
+        position: absolute;
+        z-index: 2;
+        pointer-events: auto;
+    }
 
-            &:active {
-                cursor: grabbing;
-            }
-        }
-
-        :global(.react-flow__edge-path) {
-            stroke: #561CCE;
-            stroke-width: 2rem;
-        }
-
-        :global(.react-flow__edge) {
-            pointer-events: all;
-            cursor: pointer;
-        }
-
-        :global(.react-flow__handle) {
-            width: 10rem !important;
-            height: 10rem !important;
-            background: #561CCE;
-            border: 2rem solid #fff;
-            border-radius: 50%;
-        }
-
-        :global(.react-flow__background) {
-            background-color: transparent;
-        }
-
-        :global(.react-flow__selection) {
-            background: rgba(161, 127, 231, 0.1);
-            border: 1rem solid #A17FE7;
-        }
-
-        :global(.react-flow__panel.react-flow__attribution) {
-            display: none;
-        }
+    &__dot {
+        position: absolute;
+        width: 6rem;
+        height: 6rem;
+        background: #561CCE;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 3;
+        pointer-events: none;
     }
 }

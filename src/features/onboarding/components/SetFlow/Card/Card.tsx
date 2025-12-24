@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { Handle, Position } from 'reactflow';
-import type { NodeProps } from 'reactflow';
 import More from '@/assets/icons/More';
 import Company from '@/assets/icons/Company';
 import Plus from '@/assets/icons/Plus';
@@ -17,23 +15,40 @@ export interface TeamMember {
 }
 
 export interface EmployeeData {
-    id: number;
+    id: string;
     title: string;
     name: string;
     position: string;
     initial: string;
     isCompany?: boolean;
     team?: TeamMember[];
-    onAddSubdepartment?: (id: number) => void;
+    onAddSubdepartment?: (id: string) => void;
 }
 
-export const Card = ({ data }: NodeProps<EmployeeData>) => {
+interface CardProps {
+    data: EmployeeData;
+}
+
+export const Card = ({ data }: CardProps) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [memberListOpen, setMemberListOpen] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
     const memberListRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Dışarı tıklandığında popupları kapat
+    // Elevate card z-index when popup is open
+    useEffect(() => {
+        const card = cardRef.current?.parentElement;
+        if (card) {
+            if (memberListOpen || menuOpen) {
+                card.style.zIndex = '9999';
+            } else {
+                card.style.zIndex = '';
+            }
+        }
+    }, [memberListOpen, menuOpen]);
+
+    // Close popups when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (memberListRef.current && !memberListRef.current.contains(event.target as Node)) {
@@ -75,20 +90,7 @@ export const Card = ({ data }: NodeProps<EmployeeData>) => {
     };
 
     return (
-        <div className={styles.card}>
-            {/* Top handle - for incoming connections */}
-            <Handle
-                type="target"
-                position={Position.Top}
-                className={styles.handle}
-                style={{
-                    background: '#561CCE',
-                    width: 10,
-                    height: 10,
-                    border: '2rem solid #fff',
-                }}
-            />
-
+        <div ref={cardRef} className={styles.card}>
             <button className={styles.card__menu} onMouseDown={handleMenuClick}>
                 <More />
             </button>
@@ -161,19 +163,8 @@ export const Card = ({ data }: NodeProps<EmployeeData>) => {
                     </button>
                 </div>
             )}
-
-            {/* Bottom handle - for outgoing connections */}
-            <Handle
-                type="source"
-                position={Position.Bottom}
-                className={styles.handle}
-                style={{
-                    background: '#561CCE',
-                    width: 10,
-                    height: 10,
-                    border: '2rem solid #fff',
-                }}
-            />
         </div>
     );
 };
+
+export default Card;
