@@ -131,30 +131,30 @@ const getConnections = (node: TreeNode, connections: { parent: string; child: st
 // Initial data creator (without handlers - will be added later)
 const createInitialData = (): TreeNode => {
     const team1: TeamMember[] = [
-        { color: '#FFA500', image: '/users/user-1.jpg', initial: 'JD', name: 'John Doe', position: 'Marketing Manager' },
-        { color: '#6F61FF', initial: 'AG', name: 'Anna Green', position: 'Content Specialist' },
-        { color: '#6F61FF', initial: 'KG', name: 'Kevin Gray', position: 'SEO Specialist' },
-        { color: '#409B3F', initial: 'NG', name: 'Nina Gold', position: 'Social Media Manager' },
-        { color: '#F83CE9', image: '/users/user-5.jpg', initial: 'SM', name: 'Sarah Miller', position: 'Brand Manager' },
+        { id: 101, color: '#FFA500', image: '/users/user-1.jpg', initial: 'JD', name: 'John Doe', position: 'Marketing Manager' },
+        { id: 102, color: '#6F61FF', initial: 'AG', name: 'Anna Green', position: 'Content Specialist' },
+        { id: 103, color: '#6F61FF', initial: 'KG', name: 'Kevin Gray', position: 'SEO Specialist' },
+        { id: 104, color: '#409B3F', initial: 'NG', name: 'Nina Gold', position: 'Social Media Manager' },
+        { id: 105, color: '#F83CE9', image: '/users/user-5.jpg', initial: 'SM', name: 'Sarah Miller', position: 'Brand Manager' },
     ];
 
     const team2: TeamMember[] = [
-        { color: '#FFA500', initial: 'AB', name: 'Alex Brown', position: 'Product Manager' },
-        { color: '#6F61FF', initial: 'MK', name: 'Mike Kelly', position: 'Developer' },
-        { color: '#6F61FF', initial: 'LT', name: 'Lisa Turner', position: 'Designer' },
-        { color: '#409B3F', initial: 'B', name: 'Bob Smith', position: 'Analyst' },
-        { color: '#F83CE9', initial: 'EJ', name: 'Emma Jones', position: 'QA Engineer' },
+        { id: 201, color: '#FFA500', initial: 'AB', name: 'Alex Brown', position: 'Product Manager' },
+        { id: 202, color: '#6F61FF', initial: 'MK', name: 'Mike Kelly', position: 'Developer' },
+        { id: 203, color: '#6F61FF', initial: 'LT', name: 'Lisa Turner', position: 'Designer' },
+        { id: 204, color: '#409B3F', initial: 'B', name: 'Bob Smith', position: 'Analyst' },
+        { id: 205, color: '#F83CE9', initial: 'EJ', name: 'Emma Jones', position: 'QA Engineer' },
     ];
 
     const team3: TeamMember[] = [
-        { color: '#FFA500', initial: 'AB', name: 'Amanda Baker', position: 'Team Lead' },
-        { color: '#6F61FF', image: '/users/user-1.jpg', initial: 'JW', name: 'Jack Wilson', position: 'Developer' },
-        { color: '#6F61FF', initial: 'IG', name: 'Ivan Garcia', position: 'Backend Developer' },
-        { color: '#409B3F', initial: 'SS', name: 'Sophie Stone', position: 'Frontend Developer' },
-        { color: '#F83CE9', image: '/users/user-6.jpg', initial: 'RH', name: 'Rachel Harris', position: 'UX Designer' },
-        { color: '#F83CE9', image: '/users/user-5.jpg', initial: 'TM', name: 'Tom Martin', position: 'DevOps' },
-        { color: '#F83CE9', image: '/users/user-7.jpg', initial: 'NC', name: 'Nancy Clark', position: 'Scrum Master' },
-        { color: '#F83CE9', image: '/users/user-8.jpg', initial: 'PL', name: 'Peter Lewis', position: 'Product Owner' },
+        { id: 301, color: '#FFA500', initial: 'AB', name: 'Amanda Baker', position: 'Team Lead' },
+        { id: 302, color: '#6F61FF', image: '/users/user-1.jpg', initial: 'JW', name: 'Jack Wilson', position: 'Developer' },
+        { id: 303, color: '#6F61FF', initial: 'IG', name: 'Ivan Garcia', position: 'Backend Developer' },
+        { id: 304, color: '#409B3F', initial: 'SS', name: 'Sophie Stone', position: 'Frontend Developer' },
+        { id: 305, color: '#F83CE9', image: '/users/user-6.jpg', initial: 'RH', name: 'Rachel Harris', position: 'UX Designer' },
+        { id: 306, color: '#F83CE9', image: '/users/user-5.jpg', initial: 'TM', name: 'Tom Martin', position: 'DevOps' },
+        { id: 307, color: '#F83CE9', image: '/users/user-7.jpg', initial: 'NC', name: 'Nancy Clark', position: 'Scrum Master' },
+        { id: 308, color: '#F83CE9', image: '/users/user-8.jpg', initial: 'PL', name: 'Peter Lewis', position: 'Product Owner' },
     ];
 
     const node4: TreeNode = {
@@ -246,9 +246,46 @@ export const Hierarchy = ({ onNext, onBack }: HierarchyProps) => {
     const handleAddSubdepartmentRef = useRef<(id: string) => void>(() => { });
     const handleDeleteNodeRef = useRef<(id: string) => void>(() => { });
     const handleEditNodeRef = useRef<(id: string) => void>(() => { });
+    const handleMoveMemberRef = useRef<(sourceId: string, targetId: string, memberId: string | number) => void>(() => { });
 
     const handleEditNode = useCallback((id: string) => {
         setIsInviteModalOpen(true);
+    }, []);
+
+    const handleMoveMember = useCallback((sourceId: string, targetId: string, memberId: string | number) => {
+        setTree(currentTree => {
+            const newTree = cloneTree(currentTree);
+
+            const findNode = (node: TreeNode, id: string): TreeNode | null => {
+                if (node.id === id) return node;
+                for (const child of node.children) {
+                    const found = findNode(child, id);
+                    if (found) return found;
+                }
+                return null;
+            };
+
+            const sourceNode = findNode(newTree, sourceId);
+            const targetNode = findNode(newTree, targetId);
+
+            if (sourceNode && targetNode && sourceNode.data.team) {
+                // Find member index
+                const memberIndex = sourceNode.data.team.findIndex(m => m.id === memberId);
+
+                if (memberIndex !== -1) {
+                    // Remove from source
+                    const [member] = sourceNode.data.team.splice(memberIndex, 1);
+
+                    // Add to target
+                    if (!targetNode.data.team) {
+                        targetNode.data.team = [];
+                    }
+                    targetNode.data.team.push(member);
+                }
+            }
+
+            return newTree;
+        });
     }, []);
 
     const handleAddSubdepartment = useCallback((parentId: string) => {
@@ -278,6 +315,7 @@ export const Hierarchy = ({ onNext, onBack }: HierarchyProps) => {
                         onAddSubdepartment: (id: string) => handleAddSubdepartmentRef.current(id),
                         onDelete: (id: string) => handleDeleteNodeRef.current(id),
                         onEdit: (id: string) => handleEditNodeRef.current(id),
+                        onMoveMember: (s, t, m) => handleMoveMemberRef.current(s, t, m),
                     },
                     children: [],
                     parent,
@@ -321,7 +359,8 @@ export const Hierarchy = ({ onNext, onBack }: HierarchyProps) => {
         handleAddSubdepartmentRef.current = handleAddSubdepartment;
         handleDeleteNodeRef.current = handleDeleteNode;
         handleEditNodeRef.current = handleEditNode;
-    }, [handleAddSubdepartment, handleDeleteNode, handleEditNode]);
+        handleMoveMemberRef.current = handleMoveMember;
+    }, [handleAddSubdepartment, handleDeleteNode, handleEditNode, handleMoveMember]);
 
     // Prevent page zoom when using wheel on this component
     useEffect(() => {
@@ -357,6 +396,7 @@ export const Hierarchy = ({ onNext, onBack }: HierarchyProps) => {
             node.data.onAddSubdepartment = (id: string) => handleAddSubdepartmentRef.current(id);
             node.data.onDelete = (id: string) => handleDeleteNodeRef.current(id);
             node.data.onEdit = (id: string) => handleEditNodeRef.current(id);
+            node.data.onMoveMember = (s, t, m) => handleMoveMemberRef.current(s, t, m);
             node.children.forEach(updateHandlers);
         };
         updateHandlers(tree);

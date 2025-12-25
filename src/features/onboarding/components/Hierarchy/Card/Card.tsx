@@ -8,6 +8,7 @@ import { MembersList } from '../MemberList/MemberList';
 import styles from './Card.module.scss';
 
 export interface TeamMember {
+    id: string | number;
     color: string;
     image?: string | null;
     initial: string;
@@ -26,6 +27,7 @@ export interface EmployeeData {
     onAddSubdepartment?: (id: string) => void;
     onDelete?: (id: string) => void;
     onEdit?: (id: string) => void;
+    onMoveMember?: (sourceNodeId: string, targetNodeId: string, memberId: string | number) => void;
 }
 
 interface CardProps {
@@ -39,6 +41,7 @@ export const Card = ({ data, isMenuOpen = false, onMenuToggle }: CardProps) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const memberListRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
 
     useEffect(() => {
         const card = cardRef.current?.parentElement;
@@ -105,8 +108,54 @@ export const Card = ({ data, isMenuOpen = false, onMenuToggle }: CardProps) => {
         onMenuToggle?.(false);
     };
 
+    // Drag and Drop Handlers
+    const handleDragStart = (e: React.DragEvent, memberId: string | number) => {
+        e.dataTransfer.setData('application/json', JSON.stringify({
+            memberId,
+            sourceNodeId: data.id
+        }));
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(true);
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+
+        try {
+            const transferData = JSON.parse(e.dataTransfer.getData('application/json'));
+            const { memberId, sourceNodeId } = transferData;
+
+            if (sourceNodeId && memberId && sourceNodeId !== data.id) {
+                data.onMoveMember?.(sourceNodeId, data.id, memberId);
+            }
+        } catch (error) {
+            console.error('Failed to parse drag data', error);
+        }
+    };
+
     return (
-        <div ref={cardRef} className={styles.card}>
+        <div
+            ref={cardRef}
+            className={`${styles.card} ${isDragOver ? styles.card__dragOver : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            style={isDragOver ? { borderColor: '#6F61FF', boxShadow: '0 0 0 2px rgba(111, 97, 255, 0.2)' } : undefined}
+        >
             <button className={styles.card__menu} onMouseDown={handleMenuClick}>
                 <More />
             </button>
@@ -129,7 +178,13 @@ export const Card = ({ data, isMenuOpen = false, onMenuToggle }: CardProps) => {
             {data.team && (
                 <div className={styles.card__team}>
                     {data.team.slice(0, 6).map((member, index) => (
-                        <div key={index} className={styles.card__team__avatar} style={{ background: member.color }}>
+                        <div
+                            key={member.id || index}
+                            className={styles.card__team__avatar}
+                            style={{ background: member.color, cursor: 'grab' }}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, member.id || index)}
+                        >
                             {member.image ? (
                                 <SafeImage src={member.image} alt={member.name || ''} fill />
                             ) : (
@@ -151,8 +206,11 @@ export const Card = ({ data, isMenuOpen = false, onMenuToggle }: CardProps) => {
             {memberListOpen && data.team && (
                 <div ref={memberListRef} className={styles.card__memberListWrapper}>
                     <MembersList
+                        nodeId={data.id}
                         members={data.team.map((member, index) => ({
-                            id: index + 1,
+                            id: typeof member.id === 'string' ? parseInt(member.id) : (member.id || index + 1),
+                            // Map string ID safely or keep original if number
+                            originalId: member.id, // Pass original ID for drag
                             name: member.name,
                             position: member.position,
                             avatar: member.image || undefined,
