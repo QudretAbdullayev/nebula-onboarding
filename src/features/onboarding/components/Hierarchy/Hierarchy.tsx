@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
-import styles from './SetFlow.module.scss';
+import styles from './Hierarchy.module.scss';
 import { Card, type EmployeeData, type TeamMember } from './Card/Card';
 import { Header } from './Header/Header';
 import { Footer } from './Footer/Footer';
+import { TeamInvite } from './TeamInvite/TeamInvite';
 
 // Tree node interface
 interface TreeNode {
@@ -12,7 +13,7 @@ interface TreeNode {
     parent?: TreeNode;
 }
 
-interface SetFlowProps {
+interface HierarchyProps {
     onNext?: () => void;
     onBack?: () => void;
 }
@@ -80,15 +81,15 @@ const generateConnectionPath = (
     const endY = childY;
     const midY = startY + CONNECTOR_OFFSET;
     const radius = 20; // Corner radius
-    
+
     // Direction: 1 for right, -1 for left
     const direction = childX > parentX ? 1 : childX < parentX ? -1 : 0;
-    
+
     if (direction === 0) {
         // Straight line down
         return `M ${parentX} ${startY} L ${parentX} ${endY}`;
     }
-    
+
     // Path with rounded corners
     // Start from parent, go down, curve horizontally, go to child X, curve down, go to child
     return `M ${parentX} ${startY} 
@@ -227,25 +228,33 @@ const createInitialData = (): TreeNode => {
     return root;
 };
 
-export const SetFlow = ({ onNext, onBack }: SetFlowProps) => {
+export const Hierarchy = ({ onNext, onBack }: HierarchyProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
-    
+
     const [scale, setScale] = useState(0.85);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
     // State must be declared before the callback that uses it
     const [tree, setTree] = useState<TreeNode>(() => createInitialData());
 
-    // Ref to hold the latest handler
-    const handleAddSubdepartmentRef = useRef<(id: string) => void>(() => {});
+    // Refs to hold the latest handlers
+    const handleAddSubdepartmentRef = useRef<(id: string) => void>(() => { });
+    const handleDeleteNodeRef = useRef<(id: string) => void>(() => { });
+    const handleEditNodeRef = useRef<(id: string) => void>(() => { });
+
+    const handleEditNode = useCallback((id: string) => {
+        setIsInviteModalOpen(true);
+    }, []);
 
     const handleAddSubdepartment = useCallback((parentId: string) => {
         setTree(currentTree => {
             const newTree = cloneTree(currentTree);
-            
+
             const findNode = (node: TreeNode): TreeNode | null => {
                 if (node.id === parentId) return node;
                 for (const child of node.children) {
@@ -267,6 +276,8 @@ export const SetFlow = ({ onNext, onBack }: SetFlowProps) => {
                         position: 'Position',
                         initial: 'NE',
                         onAddSubdepartment: (id: string) => handleAddSubdepartmentRef.current(id),
+                        onDelete: (id: string) => handleDeleteNodeRef.current(id),
+                        onEdit: (id: string) => handleEditNodeRef.current(id),
                     },
                     children: [],
                     parent,
@@ -278,10 +289,39 @@ export const SetFlow = ({ onNext, onBack }: SetFlowProps) => {
         });
     }, []);
 
-    // Keep ref updated
+    const handleDeleteNode = useCallback((nodeId: string) => {
+        setTree(currentTree => {
+            if (currentTree.id === nodeId) {
+                console.warn("Cannot delete root node");
+                return currentTree;
+            }
+
+            const newTree = cloneTree(currentTree);
+
+            const findParentOf = (node: TreeNode, targetId: string): TreeNode | null => {
+                for (const child of node.children) {
+                    if (child.id === targetId) return node;
+                    const found = findParentOf(child, targetId);
+                    if (found) return found;
+                }
+                return null;
+            };
+
+            const parent = findParentOf(newTree, nodeId);
+            if (parent) {
+                parent.children = parent.children.filter(child => child.id !== nodeId);
+            }
+
+            return newTree;
+        });
+    }, []);
+
+    // Keep refs updated
     useEffect(() => {
         handleAddSubdepartmentRef.current = handleAddSubdepartment;
-    }, [handleAddSubdepartment]);
+        handleDeleteNodeRef.current = handleDeleteNode;
+        handleEditNodeRef.current = handleEditNode;
+    }, [handleAddSubdepartment, handleDeleteNode, handleEditNode]);
 
     // Prevent page zoom when using wheel on this component
     useEffect(() => {
@@ -315,6 +355,8 @@ export const SetFlow = ({ onNext, onBack }: SetFlowProps) => {
         // Update handlers on all nodes (inline recursive function)
         const updateHandlers = (node: TreeNode) => {
             node.data.onAddSubdepartment = (id: string) => handleAddSubdepartmentRef.current(id);
+            node.data.onDelete = (id: string) => handleDeleteNodeRef.current(id);
+            node.data.onEdit = (id: string) => handleEditNodeRef.current(id);
             node.children.forEach(updateHandlers);
         };
         updateHandlers(tree);
@@ -365,14 +407,14 @@ export const SetFlow = ({ onNext, onBack }: SetFlowProps) => {
         if (target.closest(`.${styles.hierarchy__card}`)) {
             return;
         }
-        
+
         e.preventDefault();
         e.stopPropagation();
-        
+
         // Zoom sensitivity (lower = less sensitive)
         const zoomSensitivity = 0.02;
         const delta = e.deltaY > 0 ? -zoomSensitivity : zoomSensitivity;
-        
+
         setScale(s => {
             const newScale = s + delta;
             return Math.min(Math.max(newScale, 0.3), 2);
@@ -467,7 +509,11 @@ export const SetFlow = ({ onNext, onBack }: SetFlowProps) => {
                                     top: pos.y,
                                 }}
                             >
-                                <Card data={node.data} />
+                                <Card
+                                    data={node.data}
+                                    isMenuOpen={activeMenuId === node.id}
+                                    onMenuToggle={(isOpen) => setActiveMenuId(isOpen ? node.id : null)}
+                                />
                             </div>
                         );
                     })}
@@ -491,9 +537,13 @@ export const SetFlow = ({ onNext, onBack }: SetFlowProps) => {
                 </div>
             </div>
 
+            {isInviteModalOpen && (
+                <TeamInvite onClose={() => setIsInviteModalOpen(false)} />
+            )}
+
             <Footer onNext={onNext} onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         </div>
     );
 };
 
-export default SetFlow;
+export default Hierarchy;

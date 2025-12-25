@@ -24,7 +24,6 @@
     &__rank {
         display: none;
         width: 24rem;
-        font-family: 'DM Sans', sans-serif;
         @include font(14, 500, 18);
         text-align: center;
         color: #4D4D4D;
@@ -45,7 +44,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'DM Sans', sans-serif;
         @include font(12, 600, 14);
         color: $white;
 
@@ -66,20 +64,17 @@
     }
 
     &__name {
-        font-family: 'DM Sans', sans-serif;
         @include font(14, 500, 18);
         color: #4D4D4D;
     }
 
     &__position {
-        font-family: 'DM Sans', sans-serif;
         @include font(12, 400, 14);
         color: #B3B3B3;
     }
 
     &__percentage {
         display: none;
-        font-family: 'DM Sans', sans-serif;
         @include font(14, 600, 18);
         text-align: right;
         color: #A17FE7;

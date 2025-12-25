@@ -28,7 +28,6 @@
         background: transparent;
         border-radius: 99rem;
         cursor: pointer;
-        font-family: 'DM Sans', sans-serif;
         @include font(16, 500, 24);
         color: #999999;
         transition: all 0.3s ease;
@@ -52,13 +51,11 @@
     }
 
     &__title {
-        font-family: 'DM Sans', sans-serif;
         @include font(32, 600, 40);
         color: #262626;
     }
 
     &__description {
-        font-family: 'DM Sans', sans-serif;
         @include font(20, 400, 28);
         color: #999999;
     }

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import More from '@/assets/icons/More';
 import Company from '@/assets/icons/Company';
-import Plus from '@/assets/icons/Plus';
+import DocumentUpload from '@/assets/icons/DocumentUpload';
+import Trash from '@/assets/icons/Trash';
 import { SafeImage } from '@/components/ui/SafeImage';
 import { MembersList } from '../MemberList/MemberList';
 import styles from './Card.module.scss';
@@ -23,62 +24,63 @@ export interface EmployeeData {
     isCompany?: boolean;
     team?: TeamMember[];
     onAddSubdepartment?: (id: string) => void;
+    onDelete?: (id: string) => void;
+    onEdit?: (id: string) => void;
 }
 
 interface CardProps {
     data: EmployeeData;
+    isMenuOpen?: boolean;
+    onMenuToggle?: (isOpen: boolean) => void;
 }
 
-export const Card = ({ data }: CardProps) => {
-    const [menuOpen, setMenuOpen] = useState(false);
+export const Card = ({ data, isMenuOpen = false, onMenuToggle }: CardProps) => {
     const [memberListOpen, setMemberListOpen] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
     const memberListRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    // Elevate card z-index when popup is open
     useEffect(() => {
         const card = cardRef.current?.parentElement;
         if (card) {
-            if (memberListOpen || menuOpen) {
+            if (memberListOpen || isMenuOpen) {
                 card.style.zIndex = '9999';
             } else {
                 card.style.zIndex = '';
             }
         }
-    }, [memberListOpen, menuOpen]);
+    }, [memberListOpen, isMenuOpen]);
 
-    // Close popups when clicking outside
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (memberListRef.current && !memberListRef.current.contains(event.target as Node)) {
-                setMemberListOpen(false);
+        const handleGlobalClick = (event: MouseEvent) => {
+            if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                onMenuToggle?.(false);
             }
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setMenuOpen(false);
+            if (memberListOpen && memberListRef.current && !memberListRef.current.contains(event.target as Node)) {
+                setMemberListOpen(false);
             }
         };
 
-        if (memberListOpen || menuOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
+        if (memberListOpen || isMenuOpen) {
+            document.addEventListener('mousedown', handleGlobalClick);
         }
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleGlobalClick);
         };
-    }, [memberListOpen, menuOpen]);
+    }, [memberListOpen, isMenuOpen, onMenuToggle]);
 
     const handleCountClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
         setMemberListOpen(prev => !prev);
-        setMenuOpen(false);
+        onMenuToggle?.(false);
     };
 
     const handleMenuClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        setMenuOpen(prev => !prev);
+        onMenuToggle?.(!isMenuOpen);
         setMemberListOpen(false);
     };
 
@@ -86,7 +88,21 @@ export const Card = ({ data }: CardProps) => {
         e.stopPropagation();
         e.preventDefault();
         data.onAddSubdepartment?.(data.id);
-        setMenuOpen(false);
+        onMenuToggle?.(false);
+    };
+
+    const handleEdit = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        data.onEdit?.(data.id);
+        onMenuToggle?.(false);
+    };
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.preventDefault();
+        data.onDelete?.(data.id);
+        onMenuToggle?.(false);
     };
 
     return (
@@ -122,7 +138,7 @@ export const Card = ({ data }: CardProps) => {
                         </div>
                     ))}
                     {data.team.length > 6 && (
-                        <button 
+                        <button
                             className={styles.card__team__count}
                             onMouseDown={handleCountClick}
                         >
@@ -134,7 +150,7 @@ export const Card = ({ data }: CardProps) => {
 
             {memberListOpen && data.team && (
                 <div ref={memberListRef} className={styles.card__memberListWrapper}>
-                    <MembersList 
+                    <MembersList
                         members={data.team.map((member, index) => ({
                             id: index + 1,
                             name: member.name,
@@ -148,14 +164,36 @@ export const Card = ({ data }: CardProps) => {
                 </div>
             )}
 
-            {menuOpen && (
+            {isMenuOpen && (
                 <div ref={menuRef} className={styles.menu}>
                     <button className={styles.menu__item} onMouseDown={handleAddSubdepartment}>
-                        <div className={styles.menu__icon}>
-                            <Plus />
+                        <div className={`${styles.menu__icon} ${styles.menu__icon__add}`}>
+                            <DocumentUpload />
                         </div>
                         <div className={styles.menu__content}>
                             <span className={styles.menu__title}>Add subdepartment or team</span>
+                            <span className={styles.menu__description}>
+                                New department or team will be made subordinate to this department.
+                            </span>
+                        </div>
+                    </button>
+                    <button className={styles.menu__item} onMouseDown={handleEdit}>
+                        <div className={`${styles.menu__icon} ${styles.menu__icon__edit}`}>
+                            <DocumentUpload />
+                        </div>
+                        <div className={styles.menu__content}>
+                            <span className={styles.menu__title}>Edit department</span>
+                            <span className={styles.menu__description}>
+                                New department or team will be made subordinate to this department.
+                            </span>
+                        </div>
+                    </button>
+                    <button className={styles.menu__item} onMouseDown={handleDelete}>
+                        <div className={`${styles.menu__icon} ${styles.menu__icon__delete}`}>
+                            <Trash />
+                        </div>
+                        <div className={styles.menu__content}>
+                            <span className={styles.menu__title}>Delete</span>
                             <span className={styles.menu__description}>
                                 New department or team will be made subordinate to this department.
                             </span>
