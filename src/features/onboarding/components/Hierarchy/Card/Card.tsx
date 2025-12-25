@@ -115,6 +115,38 @@ export const Card = ({ data, isMenuOpen = false, onMenuToggle }: CardProps) => {
             sourceNodeId: data.id
         }));
         e.dataTransfer.effectAllowed = 'move';
+
+        // Set custom drag image to ensure border-radius is respected
+        const target = e.currentTarget as HTMLElement;
+        if (target) {
+            const clone = target.cloneNode(true) as HTMLElement;
+
+            // Explicitly set styles for the drag image
+            clone.style.width = '32rem';
+            clone.style.height = '32rem';
+            clone.style.borderRadius = '50%';
+            clone.style.overflow = 'hidden';
+            clone.style.position = 'absolute';
+            clone.style.top = '-9999rem';
+            clone.style.left = '-9999rem';
+            clone.style.zIndex = '9999';
+
+            // Ensure the image inside fits
+            const img = clone.querySelector('img');
+            if (img) {
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+            }
+
+            document.body.appendChild(clone);
+            e.dataTransfer.setDragImage(clone, 16, 16);
+
+            requestAnimationFrame(() => {
+                document.body.removeChild(clone);
+            });
+        }
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -154,7 +186,7 @@ export const Card = ({ data, isMenuOpen = false, onMenuToggle }: CardProps) => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            style={isDragOver ? { borderColor: '#6F61FF', boxShadow: '0 0 0 2px rgba(111, 97, 255, 0.2)' } : undefined}
+            style={isDragOver ? { borderColor: '#6F61FF', boxShadow: '0 0 0 2rem rgba(111, 97, 255, 0.2)' } : undefined}
         >
             <button className={styles.card__menu} onMouseDown={handleMenuClick}>
                 <More />

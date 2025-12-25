@@ -2,7 +2,7 @@ import styles from './MemberList.module.scss';
 
 export interface Member {
     id: number;
-    originalId?: string | number; // Added to carry the original ID if it's a string/number mix
+    originalId?: string | number;
     name: string;
     position: string;
     avatar?: string;
@@ -13,7 +13,7 @@ export interface Member {
 }
 
 interface MembersListProps {
-    nodeId?: string; // ID of the node this list belongs to
+    nodeId?: string;
     members?: Member[];
     showPercentage?: boolean;
     onClose?: () => void;
@@ -38,7 +38,6 @@ export const MembersList = ({ members, showPercentage = false, nodeId }: Members
     const handleDragStart = (e: React.DragEvent, member: Member) => {
         if (!nodeId) return;
 
-        // Use originalId if present (from Card mapping), otherwise id
         const memberId = member.originalId !== undefined ? member.originalId : member.id;
 
         e.dataTransfer.setData('application/json', JSON.stringify({
@@ -46,6 +45,45 @@ export const MembersList = ({ members, showPercentage = false, nodeId }: Members
             sourceNodeId: nodeId
         }));
         e.dataTransfer.effectAllowed = 'move';
+
+        // Set custom drag image (only the avatar)
+        const target = e.currentTarget as HTMLElement;
+        const avatarEl = target.querySelector(`.${styles.list__avatar}`) as HTMLElement;
+
+        if (avatarEl) {
+            // Create a clone to ensure we have full control over the visual
+            const clone = avatarEl.cloneNode(true) as HTMLElement;
+
+            // Apply explicit styles to the clone to ensure it looks right
+            clone.style.width = '32px';
+            clone.style.height = '32px';
+            clone.style.borderRadius = '50%'; // Force circle
+            clone.style.overflow = 'hidden';
+            clone.style.position = 'absolute';
+            clone.style.top = '-9999px';
+            clone.style.left = '-9999px';
+            clone.style.zIndex = '9999';
+            clone.style.backgroundColor = avatarEl.style.backgroundColor || 'transparent';
+
+            // Ensure image inside (if any) fits correctly
+            const img = clone.querySelector('img');
+            if (img) {
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+            }
+
+            document.body.appendChild(clone);
+
+            // setDragImage
+            e.dataTransfer.setDragImage(clone, 16, 16); // Center (32/2)
+
+            // Cleanup
+            requestAnimationFrame(() => {
+                document.body.removeChild(clone);
+            });
+        }
     };
 
     return (
